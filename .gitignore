@@ -1,1 +1,3 @@
 /.vs/*
+/obj/Debug/*.cs
+/obj/Debug/*.cache
