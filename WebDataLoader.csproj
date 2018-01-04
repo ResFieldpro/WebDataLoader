@@ -7,8 +7,8 @@
     <ProjectGuid>{82D00084-FA11-4BB5-B009-5822A382505E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WebDataLoader1</RootNamespace>
-    <AssemblyName>WebDataLoader1</AssemblyName>
+    <RootNamespace>WebDataLoader</RootNamespace>
+    <AssemblyName>WebDataLoader</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
