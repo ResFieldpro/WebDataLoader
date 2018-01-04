@@ -1,3 +1,4 @@
 /.vs/*
-/obj/Debug/*.cs
-/obj/Debug/*.cache
+*.cache
+*.pdb
+TemporaryGeneratedFile_*.cs
