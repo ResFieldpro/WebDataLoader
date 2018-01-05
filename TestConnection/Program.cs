@@ -50,8 +50,23 @@ namespace WebDataLoaderTest
 				int cols = dt.Columns.Count;
 				for (int i = 0; i < cols; i++)
 				{
-					Console.WriteLine(dr[i] as string);
+					if (dt.Columns[i].DataType == typeof(string))
+					{
+						Console.Write((dr[i] as string) + "\t");
+					}
+					else
+					{
+						if (dr[i] == System.DBNull.Value)
+						{
+							Console.Write(" \t");
+						}
+						else
+						{
+							Console.Write((Convert.ToDouble(dr[i])).ToString() + "\t");
+						}
+					}
 				}
+				Console.Write(Environment.NewLine);
 			}
 			
 			Console.ReadKey();
