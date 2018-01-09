@@ -241,5 +241,15 @@ namespace WebDataLoader
 			string id = GetWellID(WebServer, WebServerU, WebServerP, UWI);
 			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceSurvey", welltype.ToString(), id);
 		}
+		public DataTable LoadMonthlyProduction(string WebServer, string WebServerU, string WebServerP, string UWI)
+		{
+			string id = GetWellID(WebServer, WebServerU, WebServerP, UWI);
+			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceProductionMonthly", welltype.ToString(), id);
+		}
+		public DataTable LoadDailyProduction(string WebServer, string WebServerU, string WebServerP, string UWI)
+		{
+			string id = GetWellID(WebServer, WebServerU, WebServerP, UWI);
+			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceProductionDaily", welltype.ToString(), id);
+		}
 	}
 }

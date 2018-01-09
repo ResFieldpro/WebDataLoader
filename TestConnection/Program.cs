@@ -82,7 +82,19 @@ namespace WebDataLoaderTest
 			string id = wi.GetWellID(web, usr, pas, uwi);
 			Console.WriteLine("Found ID:" + id);
 
+			Console.WriteLine("Survey - press key");
+			Console.ReadKey();
 			dt = wi.LoadSurvey(web, usr, pas, uwi);
+			OutputTable(dt);
+
+			Console.WriteLine("Production Monthly - press key");
+			Console.ReadKey();
+			dt = wi.LoadMonthlyProduction(web, usr, pas, uwi);
+			OutputTable(dt);
+
+			Console.WriteLine("Production Daily - press key");
+			Console.ReadKey();
+			dt = wi.LoadDailyProduction(web, usr, pas, uwi);
 			OutputTable(dt);
 
 			Console.ReadKey();
