@@ -17,10 +17,12 @@ namespace WebDataLoader
 {
 	public class WebImporter
 	{
+		//static members
 		static int NameSpaceCounter = 0;
 		static string ObjectManagerServiceName = "ObjectManagerService";
 		static Dictionary<string, object> WebServices = new Dictionary<string, object>();
 		static Dictionary<string, string> WebSessions = new Dictionary<string, string>();
+		//helpers
 		string Webhash(string WebServer, string WebServerU, string WebServerP)
 		{
 			return $"server:{WebServer}user:{WebServerU}password:{WebServerP}";
@@ -46,6 +48,7 @@ namespace WebDataLoader
 				WebServerU = "WINLGN:" + res;
 			}
 		}
+		//data loader
 		object GetObjectManagerService(string WebServer, string WebServerU, string WebServerP)
 		{
 			if (string.IsNullOrEmpty(WebServer))
@@ -105,44 +108,6 @@ namespace WebDataLoader
 			string websession = mi.Invoke(ObjectManagerService, argss).ToString();
 			WebSessions[hash] = websession;
 			return websession;
-		}
-		public DataTable GetOutput(string WebServer, string WebServerU, string WebServerP, string outputname)
-		{
-			string session = GetSession(WebServer, WebServerU, WebServerP);
-			object ObjectManagerService = GetObjectManagerService(WebServer, WebServerU, WebServerP);
-			MethodInfo mi = ObjectManagerService.GetType().GetMethod("GetGlobalReportID");
-			object[] argss = new object[2] { session, outputname};
-			string id = mi.Invoke(ObjectManagerService, argss).ToString();
-
-			CorrectWebAddress(ref WebServer);
-			string url = $"{WebServer}viewoutput.aspx?OutputID={id}&VT=16&Context=%3a450+{id}&SkipWait=1&ServiceSessionID={session}";
-
-			Console.WriteLine(url);
-			Uri ur = new Uri(url);
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(ur);
-			request.Timeout = 600000;
-			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-			string res = "";
-			if (response.StatusCode == HttpStatusCode.OK)
-			{
-				Stream receiveStream = response.GetResponseStream();
-				StreamReader readStream = null;
-
-				if (response.CharacterSet == null)
-				{
-					readStream = new StreamReader(receiveStream);
-				}
-				else
-				{
-					readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
-				}
-
-				res = readStream.ReadToEnd();
-				response.Close();
-				readStream.Close();
-			}
-			return BuildDataSet(res);
 		}
 		private DataTable BuildDataSet(string str)
 		{
@@ -210,6 +175,61 @@ namespace WebDataLoader
 			}
 			return dtCloned;
 		}
+		public DataTable GetOutput(string WebServer, string WebServerU, string WebServerP, string outputname)
+		{
+			string session = GetSession(WebServer, WebServerU, WebServerP);
+			object ObjectManagerService = GetObjectManagerService(WebServer, WebServerU, WebServerP);
+			MethodInfo mi = ObjectManagerService.GetType().GetMethod("GetGlobalReportID");
+			object[] argss = new object[2] { session, outputname };
+			string id = mi.Invoke(ObjectManagerService, argss).ToString();
 
+			CorrectWebAddress(ref WebServer);
+			string url = $"{WebServer}viewoutput.aspx?OutputID={id}&VT=16&Context=%3a450+{id}&SkipWait=1&ServiceSessionID={session}";
+
+			Console.WriteLine(url);
+			Uri ur = new Uri(url);
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(ur);
+			request.Timeout = 600000;
+			HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+			string res = "";
+			if (response.StatusCode == HttpStatusCode.OK)
+			{
+				Stream receiveStream = response.GetResponseStream();
+				StreamReader readStream = null;
+
+				if (response.CharacterSet == null)
+				{
+					readStream = new StreamReader(receiveStream);
+				}
+				else
+				{
+					readStream = new StreamReader(receiveStream, Encoding.GetEncoding(response.CharacterSet));
+				}
+
+				res = readStream.ReadToEnd();
+				response.Close();
+				readStream.Close();
+			}
+			return BuildDataSet(res);
+		}
+		//objects loaders
+		public DataTable LoadWells(string WebServer, string WebServerU, string WebServerP)
+		{
+			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSource");
+		}
+		public string GetWellID(string WebServer, string WebServerU, string WebServerP, string UWI)
+		{
+			string session = GetSession(WebServer, WebServerU, WebServerP);
+			object ObjectManagerService = GetObjectManagerService(WebServer, WebServerU, WebServerP);
+			MethodInfo mi = ObjectManagerService.GetType().GetMethod("GetWellID");
+			object[] argss = new object[2] { session, UWI };
+			string id = mi.Invoke(ObjectManagerService, argss).ToString();
+			return id;
+		}
+		public DataTable LoadSurvey(string WebServer, string WebServerU, string WebServerP)
+		{
+			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceSurvey");
+		}
 	}
 }
