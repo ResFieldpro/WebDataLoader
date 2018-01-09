@@ -18,6 +18,8 @@ namespace WebDataLoader
 	public class WebImporter
 	{
 		//static members
+		static int welltype = 2;
+		static int NullLongData = -2147483648;
 		static int NameSpaceCounter = 0;
 		static string ObjectManagerServiceName = "ObjectManagerService";
 		static Dictionary<string, object> WebServices = new Dictionary<string, object>();
@@ -175,16 +177,23 @@ namespace WebDataLoader
 			}
 			return dtCloned;
 		}
-		public DataTable GetOutput(string WebServer, string WebServerU, string WebServerP, string outputname)
+		public DataTable GetOutput(string WebServer, string WebServerU, string WebServerP, string outputname, string otype = "", string oid = "")
 		{
 			string session = GetSession(WebServer, WebServerU, WebServerP);
 			object ObjectManagerService = GetObjectManagerService(WebServer, WebServerU, WebServerP);
 			MethodInfo mi = ObjectManagerService.GetType().GetMethod("GetGlobalReportID");
 			object[] argss = new object[2] { session, outputname };
 			string id = mi.Invoke(ObjectManagerService, argss).ToString();
+			if (id.Equals(NullLongData.ToString()))
+				throw new Exception($"Cannot fine output: {outputname}");
 
 			CorrectWebAddress(ref WebServer);
-			string url = $"{WebServer}viewoutput.aspx?OutputID={id}&VT=16&Context=%3a450+{id}&SkipWait=1&ServiceSessionID={session}";
+			string context = $"%3a450+{id}";
+			if (!string.IsNullOrEmpty(otype) && !string.IsNullOrEmpty(oid))
+			{
+				context = $"%3a{otype}+{oid}";
+			}
+			string url = $"{WebServer}viewoutput.aspx?OutputID={id}&VT=16&Context={context}&SkipWait=1&ServiceSessionID={session}";
 
 			Console.WriteLine(url);
 			Uri ur = new Uri(url);
@@ -227,9 +236,10 @@ namespace WebDataLoader
 			string id = mi.Invoke(ObjectManagerService, argss).ToString();
 			return id;
 		}
-		public DataTable LoadSurvey(string WebServer, string WebServerU, string WebServerP)
+		public DataTable LoadSurvey(string WebServer, string WebServerU, string WebServerP, string UWI)
 		{
-			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceSurvey");
+			string id = GetWellID(WebServer, WebServerU, WebServerP, UWI);
+			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceSurvey", welltype.ToString(), id);
 		}
 	}
 }
