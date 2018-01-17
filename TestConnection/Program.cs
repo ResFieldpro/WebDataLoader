@@ -51,6 +51,8 @@ namespace WebDataLoaderTest
 			if (string.IsNullOrEmpty(web))
 				web = @"http://localhost:27714/";
 
+			Console.WriteLine("Connected: " + wi.TestWebServer(web).ToString());
+
 			Console.WriteLine("Enter user name:");
 			string usr = Console.ReadLine();
 			if (string.IsNullOrEmpty(usr))

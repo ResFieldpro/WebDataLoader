@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Security.Principal;
 using System.Text;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Services.Description;
@@ -25,6 +25,20 @@ namespace WebDataLoader
 		static Dictionary<string, object> WebServices = new Dictionary<string, object>();
 		static Dictionary<string, string> WebSessions = new Dictionary<string, string>();
 		//helpers
+		public bool TestWebServer(string WebServer)
+		{
+			var url = WebServer + ObjectManagerServiceName + ".asmx";
+			try
+			{
+				var myRequest = (HttpWebRequest)WebRequest.Create(url);
+				var response = (HttpWebResponse)myRequest.GetResponse();
+				return true;
+			}
+			catch (Exception ex)
+			{
+				return false;
+			}
+		}
 		string Webhash(string WebServer, string WebServerU, string WebServerP)
 		{
 			return $"server:{WebServer}user:{WebServerU}password:{WebServerP}";
