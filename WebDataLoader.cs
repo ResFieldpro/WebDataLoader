@@ -12,6 +12,8 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Services.Description;
+using ICSharpCode.SharpZipLib.Zip;
+using ICSharpCode.SharpZipLib.Core;
 
 namespace WebDataLoader
 {
@@ -22,7 +24,8 @@ namespace WebDataLoader
 		static int NullLongData = -2147483648;
 		static int NameSpaceCounter = 0;
 		static string ObjectManagerServiceName = "ObjectManagerService";
-		static Dictionary<string, object> WebServices = new Dictionary<string, object>();
+        static string MigImportServiceName = "MigImportService";
+        static Dictionary<string, object> WebServices = new Dictionary<string, object>();
 		static Dictionary<string, string> WebSessions = new Dictionary<string, string>();
 		//helpers
 		public bool TestWebServer(string WebServer)
@@ -199,7 +202,7 @@ namespace WebDataLoader
 			object[] argss = new object[2] { session, outputname };
 			string id = mi.Invoke(ObjectManagerService, argss).ToString();
 			if (id.Equals(NullLongData.ToString()))
-				throw new Exception($"Cannot fine output: {outputname}");
+				throw new Exception($"Cannot find output: {outputname}");
 
 			CorrectWebAddress(ref WebServer);
 			string context = $"%3a450+{id}";
@@ -265,5 +268,105 @@ namespace WebDataLoader
 			string id = GetWellID(WebServer, WebServerU, WebServerP, UWI);
 			return GetOutput(WebServer, WebServerU, WebServerP, "PetrelSourceProductionDaily", welltype.ToString(), id);
 		}
-	}
+        //uploads
+        bool PrepareZippedArray(string strInFile, out byte[] buf)
+        {
+            buf = null;
+            string strFileName = Path.GetFileName(strInFile);
+            FileInfo fi = new FileInfo(strInFile);
+
+            MemoryStream ms = null;
+            try
+            {
+                ms = new MemoryStream();
+                ZipOutputStream zipStream = new ZipOutputStream(ms);
+                zipStream.SetLevel(9);
+                ZipEntry newEntry = new ZipEntry(strFileName);
+                newEntry.DateTime = fi.LastWriteTime;
+                newEntry.Size = fi.Length;
+                zipStream.PutNextEntry(newEntry);
+
+                byte[] buffer = new byte[4096];
+                FileStream streamReader = File.OpenRead(strInFile);
+                StreamUtils.Copy(streamReader, zipStream, buffer);
+
+                streamReader.Close();
+                zipStream.CloseEntry();
+                zipStream.IsStreamOwner = false;
+                zipStream.Close();
+
+                buf = ms.ToArray();
+                return true;
+            }
+            catch (System.Exception /*ex*/)
+            {
+                return false;
+            }
+            finally
+            {
+                if (ms != null)
+                    ms.Close();
+            }
+        }
+        object GetMigproSerice(string WebServer, string WebServerU, string WebServerP)
+        {
+            if (string.IsNullOrEmpty(WebServer))
+                throw new Exception("Invalid web server address!");
+            //store all instances of service class as each instance is a separate dll and loaded each time into memory
+            string hash = "Migration" + Webhash(WebServer, WebServerU, WebServerP);
+            if (WebServices.ContainsKey(hash))
+            {
+                return WebServices[hash];
+            }
+
+            ServiceDescriptionImporter importer = new ServiceDescriptionImporter();
+            using (System.Net.WebClient client = new System.Net.WebClient())
+            {
+                CorrectWebAddress(ref WebServer);
+
+                System.IO.Stream stream = client.OpenRead(WebServer + MigImportServiceName + ".asmx?wsdl");
+                importer.ProtocolName = "Soap12";
+                ServiceDescription description = ServiceDescription.Read(stream);
+                importer.AddServiceDescription(description, null, null);
+                importer.Style = ServiceDescriptionImportStyle.Client;
+            }
+
+            importer.CodeGenerationOptions = System.Xml.Serialization.CodeGenerationOptions.GenerateProperties;
+            CodeNamespace nmspace = new CodeNamespace();
+            NameSpaceCounter++;
+            CodeCompileUnit CompileUnit = new CodeCompileUnit();
+            CompileUnit.Namespaces.Add(nmspace);
+            ServiceDescriptionImportWarnings warning = importer.Import(nmspace, CompileUnit);
+            if (warning == 0)
+            {
+                string[] assemblyReferences = new string[2] { "System.Web.Services.dll", "System.Xml.dll" };
+                CompilerParameters parms = new CompilerParameters(assemblyReferences);
+                CompilerResults results;
+                using (CodeDomProvider DomProvider = CodeDomProvider.CreateProvider("CSharp"))
+                {
+                    results = DomProvider.CompileAssemblyFromDom(parms, CompileUnit);
+                }
+
+                object wsvcClass = results.CompiledAssembly.CreateInstance(MigImportServiceName);
+                WebServices[hash] = wsvcClass;
+                return wsvcClass;
+            }
+            throw new Exception(message: "Failed to connect to web servie. Check web server exists.");
+
+        }
+        public int UploadData(string WebServer, string WebServerU, string WebServerP, string datafile, string migfile)
+        {
+            object Service = GetMigproSerice(WebServer, WebServerU, WebServerP);
+            MethodInfo mi = Service.GetType().GetMethod("ImportFileToFieldpro");
+            GetCorrectedUserCreds(ref WebServerU, ref WebServerP);
+
+            byte[] b1 = null;
+            PrepareZippedArray(datafile, out b1);
+            byte[] b2 = null;
+            PrepareZippedArray(migfile, out b2);
+
+            object[] argss = new object[7] { WebServerU, WebServerP, Path.GetFileName(datafile), b1, Path.GetFileName(migfile), b2, 3};
+            return Convert.ToInt32(mi.Invoke(Service, argss));
+        }
+    }
 }

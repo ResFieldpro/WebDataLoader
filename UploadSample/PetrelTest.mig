@@ -1,0 +1,300 @@
+<?xml version="1.0"?>
+<MigFile>
+	<FipVersion>2018.8d.342.5.84</FipVersion>
+	<MigFileVersion>1.0</MigFileVersion>
+	<MigFileScriptTypeBefore>2</MigFileScriptTypeBefore>
+	<MigFileScriptBefore>using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.IO;
+using System.Globalization;
+
+namespace PetrelScript
+{
+	class Program
+	{
+		static void Main(string[] args)
+		{
+			string strFolderToSearch = Directory.GetParent(System.Reflection.Assembly.GetEntryAssembly().Location).ToString() + "\\";
+			File.Delete(strFolderToSearch + "WellData.txt");
+			File.Delete(strFolderToSearch + "Schema.ini");
+
+			string[] arrFiles = Directory.GetFiles(strFolderToSearch, @"*.txt");
+			if (arrFiles.Length &lt;= 0)
+				return;
+			string strSourceFile = arrFiles[0];
+
+			string strParsedFile = strFolderToSearch + "WellData.txt";
+			File.Copy(strSourceFile, strParsedFile);
+
+			//Schema.ini
+			string strTemp, strFile = strFolderToSearch + "Schema.ini";
+			using (StreamWriter writer = new StreamWriter(strFile, false))
+			{
+				WriteCommonSchemaSection(writer, "WellData.txt");
+				strTemp = "Col1=WELL_NAME Char Width 255";
+				writer.WriteLine(strTemp);
+				strTemp = "Col2=COUNTRY_NAME Char Width 255";
+				writer.WriteLine(strTemp);
+				strTemp = "Col3=FIELD_NAME Char Width 255";
+				writer.WriteLine(strTemp);
+				strTemp = "Col4=AREA Char Width 255";
+				writer.WriteLine(strTemp);
+				strTemp = "Col5=UWI Char Width 255";
+				writer.WriteLine(strTemp);
+				strTemp = "Col6=DEPTH_MD Double";
+				writer.WriteLine(strTemp);
+				strTemp = "Col7=DEPTH_TVD Double";
+				writer.WriteLine(strTemp);
+				strTemp = "Col8=X_COORD Double";
+				writer.WriteLine(strTemp);
+				strTemp = "Col9=Y_COORD Double";
+				writer.WriteLine(strTemp);
+				strTemp = "Col10=Z_COORD Double";
+				writer.WriteLine(strTemp);
+			}
+			return;
+		}
+
+		public static void WriteCommonSchemaSection(StreamWriter writer, string strFileSection)
+		{
+			string strTemp = "[" + strFileSection + "]";
+			writer.WriteLine(strTemp);
+			strTemp = "ColNameHeader=True";
+			writer.WriteLine(strTemp);
+			strTemp = "Format=TabDelimited";
+			writer.WriteLine(strTemp);
+			strTemp = "MaxScanRows=25";
+			writer.WriteLine(strTemp);
+			strTemp = "CharacterSet=ANSI";
+			writer.WriteLine(strTemp);
+			strTemp = "DateTimeFormat=MM/DD/YYYY HH:NN:SS";
+			writer.WriteLine(strTemp);
+			strTemp = "DecimalSymbol=.";
+			writer.WriteLine(strTemp);
+		}
+	}
+}
+</MigFileScriptBefore>
+	<Queries>
+		<Query>
+			<ObjectName>objWell</ObjectName>
+			<QueryStep>1</QueryStep>
+			<QueryType>7</QueryType>
+			<QueryComment>
+			</QueryComment>
+			<QueryStartTag>SELECT</QueryStartTag>
+			<QueryItems>
+				<QueryItem>
+					<QueryItemString>WELL_NAME</QueryItemString>
+					<QueryItemOrder>1</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>UWI</QueryItemString>
+					<QueryItemOrder>2</QueryItemOrder>
+				</QueryItem>
+			</QueryItems>
+			<QueryEndTag>FROM WellData.txt</QueryEndTag>
+			<QueryOptions>
+				<QueryOption>
+					<QueryOptionID>200004</QueryOptionID>
+					<QueryOptionValue>no</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200005</QueryOptionID>
+					<QueryOptionValue>2</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200077</QueryOptionID>
+					<QueryOptionValue>1</QueryOptionValue>
+				</QueryOption>
+			</QueryOptions>
+			<QueryParameters>
+				<QueryParameter>
+					<ParameterQueryItemKey>1</ParameterQueryItemKey>
+					<ParameterID>32001</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_WellName</ParameterDestPROPID>
+				</QueryParameter>
+				<QueryParameter>
+					<ParameterQueryItemKey>2</ParameterQueryItemKey>
+					<ParameterID>32002</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_WellUWI</ParameterDestPROPID>
+				</QueryParameter>
+			</QueryParameters>
+			<DirectSQLs/>
+			<QueryReferences/>
+		</Query>
+		<Query>
+			<ObjectName>objWell</ObjectName>
+			<QueryStep>2</QueryStep>
+			<QueryType>7</QueryType>
+			<QueryComment>
+			</QueryComment>
+			<QueryStartTag>SELECT</QueryStartTag>
+			<QueryItems>
+				<QueryItem>
+					<QueryItemString>WELL_NAME</QueryItemString>
+					<QueryItemOrder>1</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>COUNTRY_NAME</QueryItemString>
+					<QueryItemOrder>2</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>FIELD_NAME</QueryItemString>
+					<QueryItemOrder>3</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>AREA</QueryItemString>
+					<QueryItemOrder>4</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>UWI</QueryItemString>
+					<QueryItemOrder>5</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>DEPTH_MD</QueryItemString>
+					<QueryItemOrder>6</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>DEPTH_TVD</QueryItemString>
+					<QueryItemOrder>7</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>X_COORD</QueryItemString>
+					<QueryItemOrder>8</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>Y_COORD</QueryItemString>
+					<QueryItemOrder>9</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>Z_COORD</QueryItemString>
+					<QueryItemOrder>10</QueryItemOrder>
+				</QueryItem>
+				<QueryItem>
+					<QueryItemString>'Base WGS 84'</QueryItemString>
+					<QueryItemOrder>11</QueryItemOrder>
+				</QueryItem>
+			</QueryItems>
+			<QueryEndTag>FROM WellData.txt</QueryEndTag>
+			<QueryOptions>
+				<QueryOption>
+					<QueryOptionID>200004</QueryOptionID>
+					<QueryOptionValue>no</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200005</QueryOptionID>
+					<QueryOptionValue>5</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200077</QueryOptionID>
+					<QueryOptionValue>1</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200095</QueryOptionID>
+					<QueryOptionValue>1</QueryOptionValue>
+				</QueryOption>
+				<QueryOption>
+					<QueryOptionID>200121</QueryOptionID>
+					<QueryOptionValue>1</QueryOptionValue>
+				</QueryOption>
+			</QueryOptions>
+			<QueryParameters>
+				<QueryParameter>
+					<ParameterQueryItemKey>1</ParameterQueryItemKey>
+					<ParameterID>32001</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_WellName</ParameterDestPROPID>
+				</QueryParameter>
+				<QueryParameter>
+					<ParameterQueryItemKey>5</ParameterQueryItemKey>
+					<ParameterID>32007</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_WellUWI</ParameterDestPROPID>
+				</QueryParameter>
+				<QueryParameter>
+					<ParameterQueryItemKey>6</ParameterQueryItemKey>
+					<ParameterID>32009</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_WellStandardDepthsTotalDepthPlanned</ParameterDestPROPID>
+				</QueryParameter>
+				<QueryParameter>
+					<ParameterQueryItemKey>8</ParameterQueryItemKey>
+					<ParameterID>32010</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_Well_X_RawCoord</ParameterDestPROPID>
+				</QueryParameter>
+				<QueryParameter>
+					<ParameterQueryItemKey>9</ParameterQueryItemKey>
+					<ParameterID>32011</ParameterID>
+					<ParameterDestObject>objWell</ParameterDestObject>
+					<ParameterDestPROPID>prop_Well_Y_RawCoord</ParameterDestPROPID>
+				</QueryParameter>
+			</QueryParameters>
+			<DirectSQLs/>
+			<QueryReferences>
+				<Reference>
+					<QueryItemKey>4</QueryItemKey>
+					<ReferenceKeyID>64001</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAreaID</ReferenceDestParameter>
+					<ReferenceObject>objRefWellArea</ReferenceObject>
+					<ReferencePROPID>propRefCode</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>4</QueryItemKey>
+					<ReferenceKeyID>64002</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAreaID</ReferenceDestParameter>
+					<ReferenceObject>objRefWellArea</ReferenceObject>
+					<ReferencePROPID>propRefShortName</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>4</QueryItemKey>
+					<ReferenceKeyID>64003</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAreaID</ReferenceDestParameter>
+					<ReferenceObject>objRefWellArea</ReferenceObject>
+					<ReferencePROPID>propRefLongName</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>3</QueryItemKey>
+					<ReferenceKeyID>64004</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAssignedField</ReferenceDestParameter>
+					<ReferenceObject>objRefField</ReferenceObject>
+					<ReferencePROPID>propRefCode</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>3</QueryItemKey>
+					<ReferenceKeyID>64005</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAssignedField</ReferenceDestParameter>
+					<ReferenceObject>objRefField</ReferenceObject>
+					<ReferencePROPID>propRefShortName</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>3</QueryItemKey>
+					<ReferenceKeyID>64006</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellAssignedField</ReferenceDestParameter>
+					<ReferenceObject>objRefField</ReferenceObject>
+					<ReferencePROPID>propRefLongName</ReferencePROPID>
+				</Reference>
+				<Reference>
+					<QueryItemKey>11</QueryItemKey>
+					<ReferenceKeyID>64007</ReferenceKeyID>
+					<ReferenceDestObject>objWell</ReferenceDestObject>
+					<ReferenceDestParameter>prop_WellCoordSystem</ReferenceDestParameter>
+					<ReferenceObject>objRefCoordSysHeader</ReferenceObject>
+					<ReferencePROPID>propCoordSysTxtID</ReferencePROPID>
+				</Reference>
+			</QueryReferences>
+		</Query>
+	</Queries>
+</MigFile>

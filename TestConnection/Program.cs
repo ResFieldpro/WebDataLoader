@@ -63,7 +63,10 @@ namespace WebDataLoaderTest
 			if (string.IsNullOrEmpty(pas))
 				pas = "web";
 
-			Console.WriteLine("Session ID:");
+            int taskid = wi.UploadData(web, usr, pas, @"C:\Users\svan\Downloads\Petrel\wells2.txt", @"C:\Users\svan\Downloads\Petrel\PetrelTest.mig");
+            Console.WriteLine("Task ID:" + taskid);
+
+            Console.WriteLine("Session ID:");
 			Console.WriteLine(wi.GetSession(web, usr, pas));
 
 			Console.WriteLine("Output name:");
